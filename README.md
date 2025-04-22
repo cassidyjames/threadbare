@@ -19,3 +19,7 @@ through a combination of comments in the files themselves, supplementary
 SPDX-FileCopyrightText: The Threadbare Authors
 SPDX-License-Identifier: MPL-2.0
 -->
+
+## Discord Notification
+
+PRs merged into `main` will send a notification to the the Endless Access Discord server to celebrate.
