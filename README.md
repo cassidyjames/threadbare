@@ -19,3 +19,7 @@ through a combination of comments in the files themselves, supplementary
 SPDX-FileCopyrightText: The Threadbare Authors
 SPDX-License-Identifier: MPL-2.0
 -->
+
+## Discord Integration
+
+Opened pull requests will notify the Endless Access Discord
