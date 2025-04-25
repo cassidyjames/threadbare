@@ -3,6 +3,9 @@
 extends CanvasLayer
 ## A basic dialogue balloon for use with Dialogue Manager.
 
+const PLAYER_RIBBON_TYPE_VARIATION := &"PlayerRibbon"
+const NPC_RIBBON_TYPE_VARIATION := &"NPCRibbon"
+
 ## The action to use for advancing the dialogue
 @export var next_action: StringName = &"ui_accept"
 
@@ -54,10 +57,17 @@ var _player_name: String = ""
 @onready var character_panel: PanelContainer = %CharacterPanel
 
 ## The label showing the name of the currently speaking character
-@onready var character_label: RichTextLabel = %CharacterLabel
+@onready var character_label: Label = %CharacterLabel
 
 ## The label showing the currently spoken dialogue
 @onready var dialogue_label: DialogueLabel = %DialogueLabel
+
+## The “Next” button container, visible when the current line is complete and there are
+## no response choices.
+@onready var next_button_container: MarginContainer = %NextButtonContainer
+
+## The “Next” button, to connect signals.
+@onready var next_button: Button = %NextButton
 
 ## The menu of responses
 @onready var responses_menu: DialogueResponsesMenu = %ResponsesMenu
@@ -72,6 +82,7 @@ func _ready() -> void:
 		responses_menu.next_action = next_action
 
 	mutation_cooldown.timeout.connect(_on_mutation_cooldown_timeout)
+	next_button.pressed.connect(func(): next(dialogue_line.next_id))
 	add_child(mutation_cooldown)
 
 
@@ -114,15 +125,19 @@ func apply_dialogue_line() -> void:
 
 	character_panel.visible = not dialogue_line.character.is_empty()
 	character_panel.theme_type_variation = (
-		"BlueRibbon" if _player_name == dialogue_line.character else "YellowRibbon"
+		PLAYER_RIBBON_TYPE_VARIATION
+		if _player_name == dialogue_line.character
+		else NPC_RIBBON_TYPE_VARIATION
 	)
-	character_label.text = "[center]%s[/center]" % tr(dialogue_line.character, "dialogue")
+	character_label.text = tr(dialogue_line.character, "dialogue")
 
 	dialogue_label.hide()
 	dialogue_label.dialogue_line = dialogue_line
 
 	responses_menu.hide()
 	responses_menu.responses = dialogue_line.responses
+
+	next_button_container.hide()
 
 	# Show our balloon
 	balloon.show()
@@ -149,6 +164,7 @@ func apply_dialogue_line() -> void:
 		is_waiting_for_input = true
 		balloon.focus_mode = Control.FOCUS_ALL
 		balloon.grab_focus()
+		next_button_container.show()
 
 
 ## Go to the next line
