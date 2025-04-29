@@ -18,7 +18,7 @@ env:
 
 jobs:
   build:
-    name: Build
+    name: Build for web
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -57,7 +57,7 @@ jobs:
           # templates here instead of in ~/.local/share/godot/
           touch ._sc_
 
-      - name: Build / Web
+      - name: Export web release
         run: |
           mkdir -v -p build/web && cd build
 
@@ -66,59 +66,37 @@ jobs:
           # binary location
           ./godot --headless --verbose --path ../ --export-release "Web" ./build/web/index.html
 
-      - name: Build / PCK
+      # PCK files are the same across export presets/platforms; prep the one
+      # just exported for web to be used separately, i.e. for Flatpak builds
+      - name: Copy PCK file
         run: |
-          mkdir -v -p build && cd build
+          cd build
+          cp web/index.pck '${{ env.PCK_NAME }}.pck'
 
-          # Note that the export path can be confusing; it's relative to the
-          # Godot project path, NOT necessarily the current directory or Godot
-          # binary location
-          ./godot --headless --verbose --path ../ --export-pack "Linux" ./build/${PCK_NAME}.pck
-
-      - name: Upload Artifact / Web
+      - name: Upload web artifact
         uses: actions/upload-artifact@v4
         with:
           name: web
           path: build/web
 
-      - name: Upload Artifact / PCK
+      - name: Upload PCK artifact
         uses: actions/upload-artifact@v4
         with:
-          name: ${{ env.PCK_NAME }}
+          name: pck
           path: build/${{ env.PCK_NAME }}.pck
 
-  flatpak:
-    name: Build / Flatpak
-    needs: build
-    runs-on: ubuntu-latest
-    container:
-      image: ghcr.io/flathub-infra/flatpak-github-actions:freedesktop-24.08
-      options: --privileged
-    steps:
-    - uses: actions/checkout@v4
-    - name: Download Artifact
-      uses: actions/download-artifact@v4
-      with:
-        name: ${{ env.PCK_NAME }}
-        path: build
-    - uses: flatpak/flatpak-github-actions/flatpak-builder@v6
-      with:
-        bundle: threadbare.flatpak
-        manifest-path: org.endlessos.threadbare.yml
-        cache-key: "flatpak-builder-${{ github.sha }}"
-
   release:
-    name: Upload Release / PCK
+    name: Attach to release
     needs: build
     if: ${{ github.event_name == 'release' }}
     runs-on: ubuntu-latest
     steps:
-      - name: Download Artifact
+      - name: Download PCK
         uses: actions/download-artifact@v4
         with:
-          name: ${{ env.PCK_NAME }}
+          name: pck
 
-      - name: Upload to Release
+      - name: Attach PCK
         env:
           GITHUB_TOKEN: ${{ github.token }}
         run: |
