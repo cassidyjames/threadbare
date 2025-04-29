@@ -25,6 +25,10 @@ modules:
   # "Project" → "Export…" → "Linux (Runnable)" → "Export PCK/ZIP" and export to
   # "build/threadbare.pck"
   - install -Dm644 build/threadbare.pck ${FLATPAK_DEST}/bin/godot-runner.pck
-  - install -Dm644 linux/icon.svg ${FLATPAK_DEST}/share/icons/hicolor/scalable/apps/${FLATPAK_ID}.svg
+
+  # The repo uses git-lfs for assets, so ensure any checkout is done using lfs;
+  # otherwise, this icon will not be present
+  - install -Dm644 icon.png ${FLATPAK_DEST}/share/icons/hicolor/128x128/apps/${FLATPAK_ID}.png
+
   - install -Dm644 linux/launcher.desktop ${FLATPAK_DEST}/share/applications/${FLATPAK_ID}.desktop
   - install -Dm644 linux/metainfo.xml ${FLATPAK_DEST}/share/metainfo/${FLATPAK_ID}.metainfo.xml
