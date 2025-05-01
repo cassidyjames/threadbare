@@ -1,4 +1,4 @@
-# Threadbare
+# Threadbare demo
 
 [Play it here!](https://endlessm.github.io/threadbare/)
 
