@@ -1,4 +1,4 @@
-# Threadbare
+# Threadbare foo
 
 [Play it here!](https://endlessm.github.io/threadbare/)
 
